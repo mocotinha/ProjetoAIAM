@@ -1,5 +1,5 @@
 # ProjetoAIAM
-Software para leitura de área em esteira transportadora
+Desenvolvimento de um sistema informatizado, que compreenda hardware e software, de baixo custo, para realizar esta tarefa de medição de área de peças em movimento.
 
 <br>
 Autores:
