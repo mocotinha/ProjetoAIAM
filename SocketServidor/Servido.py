@@ -2,6 +2,7 @@
 import socket
 import cv2
 import numpy as np
+import time
 from matplotlib import pyplot as plt
 
 HOST = 'localhost'              # Endereco IP do Servidor
@@ -12,21 +13,19 @@ tcp.bind(orig)
 tcp.listen(1)
 while True:
     con, cliente = tcp.accept()
-    tela = []
+    tela = np.zeros((200,499), np.float32)
     while True:
+        start = time.clock()
         msg = con.recv(499)
         if not msg: break
         entrada = list(msg)
-        if len(tela) >= 200:
-            tela.pop(0)
-            tela.append(entrada)
-            imagem = np.array(tela,np.float32)
-            cv2.imshow("Imagem", imagem)
-            k = cv2.waitKey(1) & 0xff
-            if k == 27:
-                break
-
-        else:
-            tela.append(entrada)
+        tela = np.insert(tela, 0, entrada, 0)
+        cv2.imshow("Imagem", tela)
+        k = cv2.waitKey(1) & 0xff
+        if k == 27:
+            break
+        tela = np.delete(tela,199,0)
+        end = time.clock()
+        print "%f\n"%(end-start,)
     cv2.destroyAllWindows()
     con.close()
