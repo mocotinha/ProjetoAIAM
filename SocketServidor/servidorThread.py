@@ -1,25 +1,27 @@
+# -*- coding: utf-8 -*-
 """
-Vers„o 0.1.1 - PRE-ALPHA - Projeto AIAM
-SoluÁ„o em socket concorrente com threads, para receber informaÁ„o do scanner e construir as telas de imagens, permite multiplas conexoes.
+Vers√£o 0.1.1 - PRE-ALPHA - Projeto AIAM
+Solu√ß√£o em socket concorrente com threads, para receber informa√ß√£o do scanner e construir as telas de imagens, permite multiplas conexoes.
 
 Autores: Allisson Alex (narokwq@gmail.com), Jozias Rolim (jozias.rolim@dce.ufpb.br)
 """
 
 import socket
 import thread
+import cv2
 import numpy as np
 
 """
-Vari·veis
+Vari√°veis
 -----------------------------------------------------------------------------------------------------------------------------
-HOST - Vari·vel constante que representa o ip do servidor, no caso o ip da maquina onde esse servidor est· rodando
-PORT - Variavel constante que representa a porta do servudor, no caso a porta da maquina em que esse servidor est· rodando
+HOST - Vari√°vel constante que representa o ip do servidor, no caso o ip da maquina onde esse servidor est√° rodando
+PORT - Variavel constante que representa a porta do servudor, no caso a porta da maquina em que esse servidor est√° rodando
 CONTAGEM_CONEXAO - representa o numero da conexao com o servidor
-tcp - nosso mecanismo de Socket para receber a conex„o, onde na funÁ„o passamos 2 argumentos, AF_INET que declara a famÌlia
-do protocolo e  SOCKET_STREAM, indica que ser· TCP/IP.
+tcp - nosso mecanismo de Socket para receber a conex√£o, onde na fun√ß√£o passamos 2 argumentos, AF_INET que declara a fam√≠lia
+do protocolo e  SOCKET_STREAM, indica que ser√° TCP/IP.
 orig - Tupla criada com IP e PORTA
 con - objeto (informacao do socket em uso) recebido onde se encontra a mensagem enviada pelo cliente
-cliente - InformaÁıes vindas do cliente pela rede, como ip e porta do cliente.
+cliente - Informa√ß√µes vindas do cliente pela rede, como ip e porta do cliente.
 tela - vetor que representa a linha recebida
 msg - mesagem recebida pelo socket, com buffer de 499
 entrada - lista formada pelos elementos da msg
@@ -32,44 +34,43 @@ telaNumero - representa o titulo da janela a ser exibida
 
 HOST = '10.0.4.35'     # Endereco IP do Servidor
 PORT = 5000            # Porta que o Servidor esta
-CONTAGEM_CONEXAO = 0
+contagem_conexao = 0
 
-def conectado(con, cliente):
-    import cv2
+
+def conectado(con, cliente, contagem_conexao):
+
     print 'Conectado por', cliente
-    tela = np.zeros((200,499), np.float32)
-    telaNumero = "Conexao %s - IP: %s"%(CONTAGEM_CONEXAO,cliente[0])
-    CONTAGEM_CONEXAO += 1
+    tela = np.zeros((200, 499), np.float32)
+    telaNumero = "Conexao %s - IP: %s" %(contagem_conexao, cliente[0])
     while True:
-        msg = con.recv(499) #A mesagem È salva em msg, lida em um buffer de  499 bytes
+        msg = con.recv(499)  #A mesagem √© salva em msg, lida em um buffer de  499 bytes
         if not msg: break
-        entrada = list(msg) #converte uma string em um vetor - EX: "ab" => ["a","b"]
+        entrada = list(msg)  #converte uma string em um vetor - EX: "ab" => ["a","b"]
         
-        tela = np.insert(tela, 0, entrada, 0) #Adiciona uma linha ao frame no final
-        cv2.imshow(telaNumero, tela)#exibe a imagem com titulo da janela telaNumero, representada pelo ndarry imagem
+        tela = np.insert(tela, 0, entrada, 0)  #Adiciona uma linha ao frame no final
+        cv2.imshow(telaNumero, tela)  #exibe a imagem com titulo da janela telaNumero, representada pelo ndarry imagem
         
-        k = cv2.waitKey(1) & 0xff#Aguarda uma tecla ser preciosada em um tempo de 1s
-        if k == 27:#Se esc for pressionada, para o processamento
+        k = cv2.waitKey(1) & 0xff  #Aguarda uma tecla ser preciosada em um tempo de 1s
+        if k == 27:  #Se esc for pressionada, para o processamento
             break
         
-        tela = np.delete(tela,199,0)#Remove a primeiro elemento do frame a ser exibido
+        tela = np.delete(tela,199,0)  #Remove a primeiro elemento do frame a ser exibido
 
     print 'Finalizando conexao do cliente', cliente
-    cv2.destroyAllWindows()#Destroi a tela de exibiÁ„o do video
-    con.close()# Fecha a conex„o com o socket
-    thread.exit()# Finaliza a Thread
+    cv2.destroyAllWindows()  #Destroi a tela de exibi√ß√£o do video
+    con.close()  #Fecha a conex√£o com o socket
+    thread.exit()  #Finaliza a Thread
 
 if __name__ == "__main__":
     tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     orig = (HOST, PORT)
 
-    tcp.bind(orig) #Vincular o socket ao ip e porta informado
-    tcp.listen(1) #Aguarda comunicaÁ„o
+    tcp.bind(orig)  #Vincular o socket ao ip e porta informado
+    tcp.listen(1)  #Aguarda comunica√ß√£o
 
     while True:
-        con, cliente = tcp.accept() #Quando recebe um socket
-        thread.start_new_thread(conectado, tuple([con, cliente])) #Incia uma thread para conversaÁ„o com o cliente especifico
-
-
-    tcp.close() #Finaliza o socket
+        con, cliente = tcp.accept()  #Quando recebe um socket
+        contagem_conexao += 1
+        thread.start_new_thread(conectado, tuple([con, cliente, contagem_conexao]))  #Incia uma thread para conversa√ß√£o com o cliente especifico
+    tcp.close()  #Finaliza o socket
