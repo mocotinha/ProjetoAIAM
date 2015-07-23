@@ -32,13 +32,12 @@ telaNumero - representa o titulo da janela a ser exibida
 """
 
 
-HOST = '10.0.4.35'     # Endereco IP do Servidor
+HOST = 'localhost'     # Endereco IP do Servidor
 PORT = 5000            # Porta que o Servidor esta
 contagem_conexao = 0
 
 
 def conectado(con, cliente, contagem_conexao):
-
     print 'Conectado por', cliente
     tela = np.zeros((200, 499), np.float32)
     telaNumero = "Conexao %s - IP: %s" %(contagem_conexao, cliente[0])
